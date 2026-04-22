@@ -1,5 +1,30 @@
 import { useEffect, useState } from "react";
 
+const emojis = [
+  "😊",
+  "😂",
+  "🔥",
+  "👍",
+  "💚",
+  "❤️",
+  "🙏",
+  "❗",
+  "✔",
+  "📦",
+  "🎉",
+  "😎",
+  "😍",
+  "😉",
+  "🌹",
+  "💪",
+  "🙂",
+  "👀",
+  "🤗",
+  "🌿",
+  "✨",
+  "👌",
+];
+
 export default function App() {
   // ✅ FIX localStorage (lazy init)
   const [scripts, setScripts] = useState(() => {
@@ -10,6 +35,11 @@ export default function App() {
       return [];
     }
   });
+
+  const insertEmoji = (emoji, type = "text") => {
+    if (type === "key") setKeyInput((prev) => prev + emoji);
+    else setTextInput((prev) => prev + emoji);
+  };
 
   const [keyInput, setKeyInput] = useState("");
   const [textInput, setTextInput] = useState("");
@@ -53,7 +83,7 @@ export default function App() {
   // ✏️ Edit
   const saveEdit = () => {
     setScripts((prev) =>
-      prev.map((s) => (s.id === editItem.id ? editItem : s))
+      prev.map((s) => (s.id === editItem.id ? editItem : s)),
     );
     setEditItem(null);
   };
@@ -113,15 +143,13 @@ export default function App() {
   const filtered = scripts.filter(
     (s) =>
       s.key.toLowerCase().includes(search.toLowerCase()) ||
-      s.text.toLowerCase().includes(search.toLowerCase())
+      s.text.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
     <div
       className={
-        (dark
-          ? "bg-[#0b0f14] text-white"
-          : "bg-[#f4f6f8] text-black") +
+        (dark ? "bg-[#0b0f14] text-white" : "bg-[#f4f6f8] text-black") +
         " min-h-screen flex flex-col"
       }
     >
@@ -158,6 +186,15 @@ export default function App() {
             value={textInput}
             onChange={(e) => setTextInput(e.target.value)}
           />
+
+          {/* Emoji Picker for Text */}
+          <div className="flex gap-2 mb-2 flex-wrap">
+            {emojis.map((e, i) => (
+              <button key={i} onClick={() => insertEmoji(e, "text")}>
+                {e}
+              </button>
+            ))}
+          </div>
 
           <button
             onClick={addScript}
