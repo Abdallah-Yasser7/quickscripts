@@ -146,6 +146,9 @@ export default function App() {
       s.text.toLowerCase().includes(search.toLowerCase()),
   );
 
+  const totalCount = scripts.length;
+  const filteredCount = filtered.length;
+
   return (
     <div
       className={
@@ -236,6 +239,37 @@ export default function App() {
             <input type="file" hidden onChange={importData} />
           </label>
         </div>
+
+        <div
+          className={`flex w-fit justify-between items-center text-xs sm:text-sm mb-3 px-3 py-2 rounded-lg ${
+            dark ? "bg-gray-800 text-gray-300" : "bg-white shadow text-gray-600"
+          }`}
+        >
+          <span>
+            {search ? (
+              <>
+                🔍 Results: <strong>{filteredCount}</strong>
+              </>
+            ) : (
+              <>
+                📝 Total: <strong>{totalCount}</strong>
+              </>
+            )}
+          </span>
+        </div>
+
+        {search && filtered.length === 0 && (
+          <div
+            className={`text-center py-10 rounded-xl ${
+              dark
+                ? "bg-gray-900 text-gray-400"
+                : "bg-white shadow text-gray-500"
+            }`}
+          >
+            <p className="text-lg mb-2">😕 No results found</p>
+            <p className="text-sm">Try another keyword</p>
+          </div>
+        )}
 
         {/* LIST */}
         {filtered.map((s, i) => (
