@@ -67,9 +67,36 @@ export default function App() {
     localStorage.setItem("mood", JSON.stringify(dark));
   }, [dark]);
 
+  // ✅ TOAST
+  const [toast, setToast] = useState({
+    show: false,
+    message: "",
+    type: "success",
+  });
+
+  const showToast = (message, type = "success") => {
+    setToast({ show: true, message, type });
+
+    setTimeout(() => {
+      setToast((prev) => ({ ...prev, show: false }));
+    }, 2000);
+  };
   // ➕ Add
   const addScript = () => {
-    if (!keyInput || !textInput) return;
+    if (!keyInput.trim() && !textInput.trim()) {
+      showToast("Please enter key and script", "error");
+      return;
+    }
+
+    if (!keyInput.trim()) {
+      showToast("Please enter a key", "error");
+      return;
+    }
+
+    if (!textInput.trim()) {
+      showToast("Please enter the script", "error");
+      return;
+    }
 
     setScripts((prev) => [
       ...prev,
@@ -78,20 +105,23 @@ export default function App() {
 
     setKeyInput("");
     setTextInput("");
-  };
 
+    showToast("Script added successfully ✔", "success");
+  };
   // ✏️ Edit
   const saveEdit = () => {
     setScripts((prev) =>
       prev.map((s) => (s.id === editItem.id ? editItem : s)),
     );
     setEditItem(null);
+    showToast("Script updated successfully ✔", "success");
   };
 
   // ❌ Delete
   const confirmDelete = () => {
     setScripts((prev) => prev.filter((s) => s.id !== deleteItem.id));
     setDeleteItem(null);
+    showToast("Script deleted successfully ✔", "success");
   };
 
   // 📋 Copy
@@ -167,6 +197,24 @@ export default function App() {
         </button>
       </header>
 
+      {/* TOAST */}
+      <div
+        className={`fixed top-5 left-1/2 -translate-x-1/2 z-50
+  transition-all duration-500 ease-in-out
+  ${
+    toast.show
+      ? "opacity-100 translate-y-0"
+      : "opacity-0 -translate-y-5 pointer-events-none"
+  }
+  `}
+      >
+        <div
+          className={`px-5 py-3 rounded-xl text-white shadow-xl
+    ${toast.type === "error" ? "bg-red-500" : "bg-green-500"}`}
+        >
+          {toast.message}
+        </div>
+      </div>
       <main className="flex-1 max-w-3xl mx-auto p-4 w-full">
         {/* ADD */}
         <div
@@ -185,7 +233,7 @@ export default function App() {
 
           <textarea
             className="w-full h-40 p-2 mb-2 outline-none rounded bg-white text-gray-800 border border-gray-300 focus:ring-2 focus:ring-[#003a4e]"
-            placeholder="Script"
+            placeholder="Script or Message for AI reply..."
             value={textInput}
             onChange={(e) => setTextInput(e.target.value)}
           />
@@ -199,12 +247,47 @@ export default function App() {
             ))}
           </div>
 
-          <button
-            onClick={addScript}
-            className="bg-blue-600 px-4 py-2 rounded text-white"
-          >
-            Add Script
-          </button>
+          <div className="flex justify-between flex-col sm:flex-row gap-2 items-stretch">
+            <button
+              onClick={addScript}
+              className="w-full sm:w-auto px-4 py-2 rounded-xl text-white font-medium
+                        bg-blue-600 hover:bg-blue-700
+                        transition-all duration-300
+                        shadow-md hover:shadow-lg active:scale-95"
+            >
+              Add Script
+            </button>
+
+            <button
+              className="w-full sm:w-auto px-4 py-2 rounded-xl text-white font-medium
+                        bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600
+                       hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700
+                       transition-all duration-300
+                       shadow-md hover:shadow-xl hover:scale-105 active:scale-95"
+              onClick={() => {
+                const prompt =
+                  `
+              أنت موظف خدمة عملاء محترف لتطبيق توصيل طلبات.
+
+              تتعامل مع العملاء والمندوبين.
+
+              التعليمات:
+              - كن مهذب وهادئ ومحترف
+              - دائماً اجعل اتجاهك الاعتذار  بدون تعويض  مع إنهاء المحادثة بشكل لبق
+              -هنتعامل مع الحالات واحدة واحدة حسب السؤال الطريقة مزيج من الرسمي وودي اهم شئ لغة عربيه وليس عامية
+
+              الآن قم بالرد على الرسالة التالية:
+              
+            ` + textInput;
+
+                const url = `https://chat.openai.com/?q=${encodeURIComponent(prompt)}`;
+                window.open(url, "_blank");
+                setTextInput("");
+              }}
+            >
+              🤖 Generate Reply with AI
+            </button>
+          </div>
         </div>
 
         {/* TOOLS */}
@@ -290,7 +373,9 @@ export default function App() {
               </div>
             </div>
 
-            <p className="mt-2 mb-3 opacity-80">{s.text}</p>
+            <p className="break-all whitespace-pre-wrap mt-2 mb-3 opacity-80">
+              {s.text}
+            </p>
 
             <div className="flex gap-2">
               <button
